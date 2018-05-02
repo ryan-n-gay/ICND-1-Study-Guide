@@ -660,3 +660,79 @@ Layer 3 - Packet
     * in fa -/-/-
     * speed 100
     * duplex full
+
+## Switching Day to day
+
+### Understanding Port Security
+
+* The Purpose and Place of Port Security
+  * We Care about things plugging into our network
+    * We want to know when someone plugs something in
+    * BYOD can cause your network to go down
+  * Two types of security:
+    1. (Everyone) Limit the number of mac addresses on each port
+    2. (Security Centric) Limit what mac addresses can access the port
+       * Statically configured
+       * Sticky mac address
+  * Three response types:
+    * Protect
+      * If limited to 1 mac address, and a second devices is plugged in, then the second device won't work.
+    * Restrict
+      * If limited to 1 mac address, and a second devices is plugged in, then the second device won't work. It will log the port security violation.
+    * and Shutdown
+      * Default State
+* Implementing basic port security
+  * Switch 1 Port Security Config
+    * int range -/-/-
+      * switchport mode access
+      * switchport port-security maximum 1
+      * do sh run int _-/-/
+    * sh int port-security int _-/-/-
+    * conf t
+      * int _-/-/-
+        * shutdown
+        * no shutdown
+        * switchport port-security
+        * switchport port-security mac-address sticky
+    * Re-enable a Port
+      * shutdown
+      * no shut
+* Implementing Mac Address restrictions
+
+### Handling "The Network is slow"
+
+* How to tell is the network is slow `speedtest consistency, iperf`
+  1. SpeedTest sites
+     * <https://speedtest.net>
+     * <https://speakeasy.net/speedtest>
+     * <https://speedof.me>
+  2. Watch speed and consistency of speed
+  3. Internal testing - IPerf `client/server`
+  4. Wired vs wireless - Never accept only a wireless test
+  5. Know your baseline usage and bandwidth capacity
+* Key interface counters
+  * Trace the switchport path between source and destination
+  * Use the `show interface` command to review statistics
+    * `tx` send
+    * `rx` receive
+    * `runts` packet smaller than what's expected, it can be dropped
+    * `giant` bigger than a packet should be, it will be dropped
+  * Key "Performance" counters:
+    * Duplex/Speed
+    * 5 minutes output rates
+    * Input errors
+      * Some kind of cabling issue or bad interface
+    * `CRC` Cyclical Redundancy check
+      * `FCS` Frame Check Sequence
+      * checks to make sure its valid
+      * bad cable, bad interface, layer 1 issue
+    * collision
+      * Own collision domain
+        * collision devices try to send when its not supposed too. Usually happens in a duplex mismatch
+        * Causes major network issues
+    * late collisions
+      * Happens when a collision happens later than it should. CSMA/CD
+      * Happens if its past the 32 bits of the frame
+      * If the cable is to long, or if there are to many devices in between
+    * interface resets
+      * This will happen if to many errors build up in an attempt to reset the interface
