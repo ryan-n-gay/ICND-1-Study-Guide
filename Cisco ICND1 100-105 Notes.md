@@ -124,8 +124,8 @@ Layer 3 Switch
 * Storage reaches into the tera / penta realm
 * Networks reaches into the giga realm
 
-* __ Mbps __
-* __ Gbps __
+* __Mbps__
+* __Gbps__
 
 * Internet and Wan always a bottleneck
 * Computers = 100m, 1G
@@ -736,3 +736,142 @@ Layer 3 - Packet
       * If the cable is to long, or if there are to many devices in between
     * interface resets
       * This will happen if to many errors build up in an attempt to reset the interface
+
+## Switching VLANs
+
+### The Concept that Changed the Networking World
+
+* Understanding the Problem
+  * There is virtually no security at Layer 2
+  * There is no segmentation at layer 2
+    * Led to the network slowing down drastically
+  * There is no real way to differentiate devices at layer 2
+
+#### QOS Recommendations
+
+Service Type | Bandwidth Allocated
+:---: | :---:
+Voice | 33%
+Mission Critical Data | 35%
+Voice Signaling | 7%
+Everything else | 25%
+
+* Old School Solution
+  1. Routers Everywhere
+     * Every interface of a router is a subnet, it introduces a subnet
+     * ACL Access Control List
+     * Routers stop broadcasts
+     * Routers are slow, causing them to be a bottle neck on the network
+     * physical limitations
+  2. Servers on Every Network
+
+* The VLAN Solution `Virtual Local Area Network`
+* VLANS segment the network on a per-port basis
+  * VLANs create multiple broadcast domains/subnets/networks
+    * Broadcasts will stay within the same VLAN
+  * VLANs Extend the entire Layer 2 fabric (stop at router)
+    * VLANs can be access across multiple switches
+    * Trunks carry all VLANs across the switches
+  * VLANs segment and isolate traffic
+
+### Routing between VLANs
+
+* Using a router
+  * THe Old, but valid Possibility
+  * Drawback
+    * Limited number of Router Interfaces
+
+* The Router on a Stick (ROAS)
+  * Trunk Port
+  * Sub interfaces
+    * Allows us to take 1 interface, and split it into multiple interfaces
+    * The Cloud, a bunch of data centers, ROAS
+
+* Using a Layer 3 Switch
+  * Combines the best of Routing and Switching, and puts them into one device.
+  * Not a Frankenstein Device
+  * Layer 3 Switching takes the core of Routing, and makes it ASIC `Application Specific Intergrated Circuitry` Based
+
+### Trunking VLANS to other Switches
+
+* Tagging Done Between Switches with 802.1q protocol
+  * Industry Standard
+  * ISL `Inner Switch Link`
+* Tag removed on exiting `access port`
+  * `Access Port` any non trunked interface
+  * These devices access only one VLAN
+* Trunk ports configured on each interface
+  * If you aren't careful about which ports you trunk, and a user is plugged into a trunk port, they can do a VLAN Hopping Attack
+
+* How the Dynamic Trunking Protocol Works
+  * When a switch is plugged in, it builds trunk
+  * When a computer is plugged in, it builds an access port
+  * Enable Trunk Ports
+    * Manual Configuration (Trunk/nonegotiate)
+    * ~~Dynamic Configuration (Dynamic Auto/Dynamic Desirable)~~
+  * Dynamic Configuration can be Creepy; Use Nonegotiate
+
+* Trunk ports should receive traffic with tags
+* but what is it doesn't? `Native VLAN`
+  * Native VLAN is for when it receives traffic that doesn't have a tag attached to it
+  * CDP
+* But how?
+  * Switchport Originated Traffic
+  * Pass-through Device
+  * Virtualized Servers
+
+### The Weird and Scary World of VTP
+
+* What is VTP
+  * Conforms your network
+  * Allows you to add a VLAN to 1 switch, and will replicate it to your other switches
+  * Cisco Recommends you not use it
+  * VTP REV #0
+  * VTP Domain
+  * Can take down the entire network
+  * To fix the network down issues, you need to re-add the VLAN to change the VLAN Database
+    * Client `Can't make changes to the databases`
+    * Server `This is default`
+    * Transparent `will turn this off`
+  * Enabled by default, as soon as its plugged in, it will form the trunk, it will join the domain
+  * Nightmare from a Security Perspective
+
+### Configuring and Testing VLANs
+
+```switch
+Switch
+
+conf t
+  vlan 2
+    name ACCT
+    exit
+  vlan 3
+    name SALES
+    exit
+  int range _-/-/_-_
+    switchport mode access
+    switchport access vlan 2
+    exit
+  int range _-/-/_-_
+    switchport mode access
+    switchport access vlan 3
+    exit
+  int range _-/-/_-_
+    spanning-tree portfast
+```
+
+When in **Configuration Mode** use the `do` command to drop down to privilege mode.
+
+## Switch Troubleshooting
+
+### Where to Look
+
+* Scenario 1: Student Testing is not working
+  * Classroom 1 seems to be broken, the other 4 classes are fine
+  * `sh int status`
+  * syslog
+* Scenario 2: Accounting spreadsheets are an bearable
+  * `clear counters int _-/-/-`
+* Scenario 3: Public WiFi is down
+  * `switchport trunk allowed vlan add _`
+  * if you do not use add, you will remove the other VLANs
