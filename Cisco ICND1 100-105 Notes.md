@@ -875,3 +875,156 @@ When in **Configuration Mode** use the `do` command to drop down to privilege mo
 * Scenario 3: Public WiFi is down
   * `switchport trunk allowed vlan add _`
   * if you do not use add, you will remove the other VLANs
+
+## Routing Fundamentals
+
+### How Routing Works
+
+* Revisiting the Essence of IP Communication
+  * The Network Boundary - Mask Defined
+  * Smart Computers
+  * The Need for Two Addresses
+  * DNS and NAT
+  * Public and Private
+  * ARP
+* Configuring some Interfaces
+* Exploring the Routing Table
+
+```text
+Router Config
+
+Line Console 0
+  logging Synch
+  no exec timeout
+Line vty 0 4
+  login
+  password cisco
+  enable secret cisco
+int _-/-
+  ip address 172.30.100.1 255.255.255.0
+  no shutdown
+int _-/-
+  no shutdown
+  ip address [Whatever info the ISP provides you with]
+
+ip route 0.0.0.0 0.0.0.0 [Whatever info the ISP provides you with]
+```
+
+**THE COMMAND** to know on routers `sh ip route`
+
+### Using Static Routing
+
+* Static Routing...Defined
+  * 
+* Static Routing Usage Scenarios
+* Static Routing Configuration
+
+```text
+Router 1
+conf t
+  hostname R1
+  line console 0
+    logging synchonous
+    no exec-timeout
+    exit
+  int s0/0/0
+    ip address 10.5.2.1 255.255.255.0
+    no shutdown
+    clock rate 64000
+    exit
+  int g0/0
+    no shutdown
+    ip address 10.5.1.1 255.255.255.0
+    exit
+  ip route 10.5.3.0 255.255.255.0 10.5.2.2
+
+  int g0/1
+    no shutdown
+    ip address 10.5.4.1 255.255.255.0
+    exit
+
+    ip route 10.5.3.0 255.255.255.0 10.5.4.2 10
+
+Router 2
+conf t
+  hostname R2
+  line console 0
+    logging synchonous
+    no exec-timeout
+    exit
+  int s0/0/0
+    ip address 10.5.2.2 255.255.255.0
+    no shutdown
+    exit
+  int g0/0
+    no shutdown
+    ip address 10.5.3.1 255.255.255.0
+    exit
+  ip route 10.5.1.0 255.255.255.0 10.5.2.1
+
+  int g0/1
+    no shutdown
+    ip address 10.5.4.2 255.255.255.0
+    exit
+
+  ip route 10.5.1.0 255.255.255.0 10.5.4.1 10
+
+  ip route 0.0.0.0 0.0.0.0 10.5.4.1 [Gateway of last resort]
+```
+
+``` text
+Things to note
+
+Serial Connnectors
+  sh controllers s-/-
+  Can tell which side is connected
+  DCE v.35
+
+  clock rate ?
+
+Floating Static Route
+  ip route A.B.C.D e.f.g.h i.j.k.l -Distance-
+
+The Rule of Specitifity
+  When Routing, going to prefer the most specific router
+```
+
+### Routing Between VLANs
+
+```text
+Switch
+  conf t
+    vlan 51
+      name ENG
+      ip address 10.1.51.1 255.255.255.0
+      exit
+    vlan 52
+      name MGMT
+      ip address 10.1.52.1 255.255.255.0
+      exit
+    int g1/0/1
+      switchport mode access
+      switchport access vlan 51
+      exit
+    int g1/0/2
+      switchport mode access
+      switchport access vlan 52
+      exit
+    int g1/0/24
+      switchport trunk encapsilation dot1q
+      switchport mode trunk
+      switchport nonegotiate
+
+
+Router
+  conf t
+    int g0/0.51
+      encapsulation dot1q 51
+      ip address 10.1.51.1 255.255.255.0
+      exit
+    int g0/0.52
+      encapsulation dot1q 52
+      ip address 10.1.52.1 255.255.255.0
+      exit    
+
+```
