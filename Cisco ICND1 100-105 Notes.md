@@ -1180,4 +1180,63 @@ Router Server Based
 
 ### Pick your flavor
 
+`ICND 1, only need to know RIP`
+
 * Yes... RIP is important (again)
+  * Created in 1988 (v1)
+    * broadcast based broadcast to share your routing table
+  * 1993 (v2)
+    * Made it to a multicast based protocol that would only send their information to other routers using RIP
+    * Its achilleas heal was its **Metric** How does the routing protocol find the best way around the network.
+    * **Metric** Uses Hop count
+    * Would send the entire routing table with every hello
+* IGRP
+  * Uses bandwidth and delay on the links, That would be its Metric
+  * Was meant to compete with RIP, Cisco Proprietary.
+  * Took long to discontent
+  * Would send the entire routing table with every hello
+* EIGRP
+  * Was Proprietary, but later released as an RFC open standard.
+  * Talks the bandwidth and delay aspect of IGRP, and is lightning fast.
+  * do an initial exchange, after that, now all it does is says hello
+  * sub-second convergence
+  * un-equal cost load balancing
+* OSPF
+  * Almost all the benefits of EIGRP
+  * Most Popular, born to be an Standard
+  * based off of bandwidth alone
+  * uses a link state database
+* IS-IS
+  * back in the day there was TCP/IP and OSI
+  * OSI Protocol created IS-IS
+  * Internet Service Provider Networks only
+  * Integrated IS-IS
+
+* sh ip route
+  * Shows only the best of the best in the routing table
+
+### Understanding RIPv2
+
+* Why v2? What happened to v1?
+  * v1
+    * Broadcast based protocol
+    * one to all
+    * could be a security vulnerably
+  * v2
+  * Multicast based protocol
+  * one to a group
+  * moves from a classful, to classless
+* Tell your life in 30 seconds
+* It's time to be a little classless...
+  * class a 0-127 (255.0.0.0)
+  * class b 128-191 (255.255.0.0)
+  * class c 192-223 (255.255.255.0)
+* Where does this protocol fit? Anywhere
+  * slowest protocol
+  * implement, monitor, troubleshoot a routing protocol
+  * commands to know
+    * `router rip`
+    * `version 2`
+    * `network`
+      * tells rip what networks to advertise
+      * tells rip what interfaces to send advertisements out of
