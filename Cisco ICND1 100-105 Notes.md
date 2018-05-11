@@ -915,7 +915,6 @@ ip route 0.0.0.0 0.0.0.0 [Whatever info the ISP provides you with]
 ### Using Static Routing
 
 * Static Routing...Defined
-  * 
 * Static Routing Usage Scenarios
 * Static Routing Configuration
 
@@ -1025,6 +1024,160 @@ Router
     int g0/0.52
       encapsulation dot1q 52
       ip address 10.1.52.1 255.255.255.0
-      exit    
+      exit
+```
+
+### Layer 3 Switching
+
+```text
+Switch Config
+conf t
+  vlan 51
+    name ENG
+    exit
+  vlan 52
+    name MGMT
+    exit
+  int g1/0/2
+    switchport mode access
+    switchport access vlan 51
+    exit
+  int g1/0/3
+    switchport mode access
+    switchport access vlan 52
+    exit
+  ip routing
+  int vlan 51
+    ip add 10.1.51.1 255.255.255.0
+    exit
+  int vlan 51
+    ip add 10.1.51.1 255.255.255.0
+    exit
+```
+
+**SVI** `Switch Virtual Interface`
+
+### DHCP in a Routed World
+
+* Understanding DHCP, Client Requests, DHCP Options
+  * Broadcast-based, Central IP distribution
+    * **Broadcast** the router will stop it
+  * Minimal Client Interaction
+  * Assigns IP address and DHCP options
+    * Option 1: Subnet Mask
+    * Option 3: Router (Gateway)
+    * Option 6: DNS Server(s)
+    * ...and hundreds of others
+  * Clients usually prefer the same IP
+* How DHCP is Usually Handled
+  * DHCP from a network device (same network)
+  * DHCP relay from a central DHCP server
+  * **DHCP is a critical service**
+* Understanding DHCP Replay
+  * configure the interface to DHCP relay at the ip address of that server
+  * router converts the DCHP broadcast request, and sends it to the server as a Unicast
+
+### Configuring DHCP
+
+```text
+Router Server Based
+
+  Switch Conf
+    conf t
+      hostname S1
+      vlan 51
+        name ENG
+        exit
+      vlan 52
+        name MGMT
+        exit
+      int g1/0/2
+        switchport mode access
+        switchport access vlan 51
+        exit
+      int g1/0/3
+        switchport mode access
+        switchport access vlan 52
+        exit
+      int g1/0/1
+        switchport mode trunk
+        switchport trunk allowed vlans 51,52
+        exit
+
+  Router Conf
+    conf t
+      int g0/0
+        no shut
+        exit
+      int g0/0.51
+        encapsulation dot1q 51
+        ip address 10.1.51.1 255.255.255.0
+        exit
+      int g0/0.52
+        encapsulation dot1q 52
+        ip address 10.1.52.1 255.255.255.0
+        exit
+      ip dhcp excluded-address 10.1.51.1 10.1.51.19
+      ip dhcp excluded-address 10.1.51.100 10.1.51.255
+      ip dhcp pool VLAN51
+        network 10.1.51.0 /24
+        default-router 10.1.51.1
+        dns-server 4.2.2.2 8.8.8.8
+        exit
+      ip dhcp excluded-address 10.1.52.1 10.1.52.19
+      ip dhcp excluded-address 10.1.52.100 10.1.52.255
+      ip dhcp pool VLAN52
+        network 10.1.52.0 /24
+        default-router 10.1.52.1
+        dns-server 4.2.2.2 8.8.8.8
+        exit
+
+  Router with no dhcp
+    conf t
+      no ip dhcp excluded-address 10.1.51.1 10.1.51.19
+      no ip dhcp excluded-address 10.1.51.100 10.1.51.255
+      no ip dhcp pool VLAN51
+      no ip dhcp excluded-address 10.1.52.1 10.1.52.19
+      no ip dhcp excluded-address 10.1.52.100 10.1.52.255
+      no ip dhcp pool VLAN52
+      int g0/0.52
+        ip helper-address 10.1.51.200
+
 
 ```
+
+#### Useful Commands from this Nugget
+
+* **sh ip dhcp binding**
+* **sh run | section ___**
+* ipconfig /release `releases the IP back to the DHCP pool`
+* ipconfig /renew `asks for a new address`
+
+### What are Routing Protocols
+
+* What is a Routing Protocol
+  * A Router knows about **ONE** type of network by default
+  * Routing Protocol: Educate a router without your involvement
+    * RIP
+    * BGP
+    * EIGRP
+    * ...many more
+  * Routing Protocols are dynamic, forming neighbors, detecting failures
+    * They use the **Hello** Protocol
+* Distance Vector Attributes
+  * Only Knows what the neighbor tells it
+  * Memory / Processor Efficient
+  * Loop Prevention Mechanisms Needed
+    * RIP
+    * EIGRP
+    * BGP
+* Link State Attributes
+  * Maintains a map of the network system
+  * Resource Consuming
+  * Maintains Loop free by nature
+    * OSPF
+    * IS-IS
+
+### Pick your flavor
+
+* Yes... RIP is important (again)
