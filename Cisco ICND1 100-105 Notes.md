@@ -1240,3 +1240,104 @@ Router Server Based
     * `network`
       * tells rip what networks to advertise
       * tells rip what interfaces to send advertisements out of
+
+### Configuring RIPv2
+
+```text
+Router 1
+  conf t
+    int g0/0
+      no shutdown
+      ip address 10.5.1.1 255.255.255.0
+      exit
+    int s0/0/0
+      no shutdown
+      clock rate 64000
+      ip address 10.5.2.1 255.255.255.0
+      exit
+    router rip
+      version 2
+      network 10.0.0.0
+      end
+  sh ip route
+
+  conf t
+    int g0/1
+      no shutdown
+      ip address 192.168.1.1 255.255.255.0
+      exit
+    router rip
+      network 192.168.1.0
+      no auto-summary
+      end
+
+Router 2
+  conf t
+    int g0/0
+      no shutdown
+      ip address 10.5.3.1 255.255.255.0
+      exit
+    int s0/0/0
+      no shutdown
+      clock rate 64000
+      ip address 10.5.2.2 255.255.255.0
+      exit
+    router rip
+      version 2
+      network 10.0.0.0
+      end
+  sh ip route
+
+  conf t
+    int g0/1
+      no shutdown
+      ip address 192.168.1.2 255.255.255.0
+      exit
+    router rip
+      network 192.168.1.0
+      end
+
+
+Computer 1
+  ip address 10.5.1.50
+  net mask 255.255.255.0
+  gateway 10.5.1.1
+
+Computer 2
+  ip address 10.5.3.50
+  net mask 255.255.255.0
+  gateway is 10.5.3.1
+```
+
+* [Administrative Distance / Metric]
+* `Adminstrative Distance` the lower the number, the more believable it is
+* `Metric` it can get to the over network via hops, the lower the better
+* Auto Summary
+
+## IPv4 Subnetting
+
+### Why are We Doing This
+
+* Classful vs Classless World
+  * IPv4 Address:
+    * Example: 10.10.10.1
+    * Four Octet (byte) Address
+    * Can be one of three different classes
+    * When combined with a subnet mask, defines a network and host portion
+    * operates at Layer 3 of the OSI Model
+    * Works closely with layer 2 address (hop-by-hop)
+* The Need for Smaller and Bigger Chunks
+  * Class A Private Range: Anything starting with 10
+    * Example: 10.0.0.0 - 10.255.255.255/8
+  * Class B Private Range: Anything Starting with 172.16
+    * Example: 172.16.0.0 - 172.31.255.255/16
+  * Class C Private Range: Anything Starting with 162.168
+    * Example: 192.168.0.0 -192.168.255.255
+  * We can define different entities of hosts as we customize each network
+* What's it take?
+
+### Binary Conversion
+
+* THe world according to Rico
+  * and his new light weight brink illustration
+* Binary Conversion Exercises
