@@ -274,7 +274,7 @@ RFC - `Request for Comments Standard`
 
 ### NAT
 
-#### Network Address translation
+#### Network Address translation Description
 
 * Translate private IP addresses to Public ones
 * All private IPs assume the same Public IP
@@ -1341,3 +1341,312 @@ Computer 2
 * THe world according to Rico
   * and his new light weight brink illustration
 * Binary Conversion Exercises
+
+### Subnetting Based on Network Requirements
+
+1. Scenario 1:
+    * This organization has purchased the Class C Address 216.21.5.0 and s would like to use it to address this network.
+      * RFC1918
+      * Determine Number of Networks and Convert it to Binary: 5 = 00000101
+      * Reserve Bits in subnet, and find your increment
+        * 255.255.255.0
+        * 11111111.11111111.11111111.00000000
+        * host bits 11100000
+        * increment 32
+        * subnet:255.255.255.224
+        * CIDR /27
+      * Use increment to find your network ranges
+        * 216.21.5.0-216.21.5.31
+        * 216.21.5.32-216.21.5.63
+        * 216.21.5.64-216.21.5.95
+        * 216.21.5.96-216.21.5.127
+        * 8 total networks
+2. Scenario 2:
+    1. Determine number of networks and convert to Binary
+        1. Class C: 195.5.20.0
+        2. Need 50 networks
+        3. 00110010
+    2. Reserve Bits in subnet mask and find your increment
+        1. 255.255.255.0
+        2. 1111111.11111111.11111111.00000000
+        3. 111111
+        4. 255.255.255.252
+        5. CIDR /30
+    3. Use increment to find your network range
+        1. 95.5.20.0-195.5.20.3
+        2. 195.5.20.4-195.5.20.7
+        3. 195.5.20.8-195.5.20.11
+        4. 195.5.20.12-195.5.20.15
+        5. 195.5.20.16-195.5.20.19
+        6. ...
+        7. Total of 64 networks
+        8. Second most popular Subnet in the world
+        9. Excellent for Point-to-point connections
+3. Scenario 3:
+    1. Determine number of networks and convert to Binary
+        1. Class B: 150.5.0.0
+        2. Need 100 Networks
+        3. 01100100
+        4. 100 = 7 bits
+    2. Reserve Bits in subnet mask and find your increment
+        1. 255.255.0.0
+        2. 11111111.11111111.00000000.00000000
+        3. subnet: 255.255.254.0
+        4. increment 2
+        5. CIDR /23
+    3. Use increment to find your network range
+        1. 150.5.0.0-150.5.1.255
+        2. 150.5.2.0-150.5.3.255
+        3. 150.5.4.0-150.5.5.255
+        4. ...
+4. Scenario 4:
+    1. Determine number of networks and convert to Binary
+        1. Class A: 10.0.0.0
+        2. Need 1000 networks
+        3. 1000
+        4. 10 bits
+    2. Reserve Bits in subnet mask and find your increment
+        1. /8 255.0.0.0
+        2. 11111111.00000000.00000000.00000000
+        3. 11111111.11111111.11000000.00000000
+        4. subnet mask 255.255.192.0
+        5. increment 64
+    3. Use increment to find your network range
+        1. 10.0.0.0-10.0.63.255
+        2. 10.0.64.0-10.0.123.255
+        3. 10.0.128.0-10.191.255
+        4. 10.0.192.0-10.0.255.255
+        5. 10.1.0.0-...
+
+### Subnetting Based on Hosts
+
+1. Scenario 1:
+    1. Determine number of hosts and convert to Binary
+        1. 216.21.5.0
+        2. 255.255.255.0
+        3. 30 user = 5 bits
+    2. Reserve Bits in subnet mask and find your increment
+        1. 255.255.255.
+        2. 11111111.11111111.11111111.00000000
+        3. 11111111.11111111.11111111.11100000
+        4. CIDR: /27
+        5. 255.255.255.224
+        6. increment 32
+    3. Use increment to find your network range
+        1. 216.21.5.0
+        2. .32
+        3. .64
+2. Scenario 2:
+    1. Determine number of hosts and convert to Binary
+        1. Class C 195.20.0
+        2. 50 Hosts = 6 bits
+    1. Reserve Bits in subnet mask and find your increment
+        1. 11111111.11111111.11111111.00000000
+        2. 11111111.11111111.11111111.11000000
+        3. CIDR /26
+        4. Subnet 255.255.255.192
+        5. increment 64
+    1. Use increment to find your network range
+        1. 195.5.20.0
+        2. 195.5.20.64
+        3. 195.5.20.128
+        4. 195.5.20.192
+3. Scenario 3:
+    1. Determine number of hosts and convert to Binary
+        1. Class B 150.5.0.0
+        2. 500 Hosts = 9 bits
+    2. Reserve Bits in subnet mask and find your increment
+        1. 11111111.11111111.00000000.00000000
+        2. 11111111.11111111.11111110.00000000
+        3. 255.255.254.0
+        4. /23
+        5. increment 2
+    3. Use increment to find your network range
+        1. 150.5.0.0
+        2. 150.5.2.0
+        3. ...
+4. Scenario 4:
+    1. Determine number of hosts and convert to Binary
+        1. Class A 10.0.0.0/8
+        2. 100 hosts = 7 bits
+    2. Reserve Bits in subnet mask and find your increment
+        1. 11111111.00000000.00000000.00000000
+        2. 11111111.11111111.11111111.10000000
+        3. 255.255.255.128
+        4. CIDR /25
+    3. Use increment to find your network range
+        1. 10.0.0.0
+        2. 10.0.0.128
+        3. 10.0.1.0
+        4. 10.0.1.128
+        5. 10.0.2.0
+        6. ....
+
+### The Great Exception
+
+* Because Binary begins Counting from zero...
+  * these network values may throw off calculations *
+    * 2, 4, 8, 16, 64, 128
+  * these host values may throw off calculations
+    * 3, 7, 15, 31, 63, 127
+* To be Safe
+  * Subtract / When Finding Networks *
+  * Add /  When Finding Hosts
+
+### Reverse Engineering a Subnet Problem
+
+* Scenario 1:
+  * IP: 192.168.1.127
+  * Mask: 255.255.255.224
+  * The subnet is broken
+* Scenario 2:
+  * IP 172.16.68.65
+  * Mask: 255.255.255.240
+  * GW: 172.16.68.62
+    * Device has the wrong GW for its IP address
+
+### Variable Length Subnet Mask (VLSM)
+
+* VLSM Scenario
+  * Subnet 192.168.1.0/24 to Address this network. Use the most efficient addressing possible.
+    * Router 1
+      * 20 Users
+    * Router 2
+      * 20 Users
+    * Router 3
+      * 60 Users
+    * Links between Router
+      * 2 users per each link
+        * 3 links in total
+    * All Routers connected to each other.
+  * Start with largest number of users
+    * 60 Users
+      * 192.168.1.0 - 192.168.1.63/26
+      * 255.255.255.192
+    * 20 User Networks
+      * 192.168.1.64 - 95/27
+      * 192.168.1.96 - 127/27
+    * 2 users
+      * 192.168.1.128 - 131/30
+      * 192.168.1.132 - 135/30
+      * 192.168.1.136 - 139/30
+
+## Access Lists
+
+### How the Router Became a Firewall
+
+* What is an Access List (ACL)
+  * Most Successful hacking attempts come from the inside.
+    * What they are: A list of Permit and Deny Statements
+      * Permit 192.168.2.50
+      * Deny 192.168.1.0/24
+      * Permit TCP Port 80 for 200.1.1.1
+      * Permit all TCP traffic for 210.0.1.0/24
+* Alternative ACL Uses
+  * What they can be used for
+    * Access Control
+    * NAT (Network Address Translation)
+    * Quality of Service
+    * Demand Dial Routing
+    * Policy Routing
+    * Route Filtering
+    * Making French Toast
+* The Rules Governing ACLS
+  * Lists are read from Top to Bottom; stops at first match
+    * Invisible implicit deny at the bottom
+  * ACL is applied to an interface inbound or outbound
+* Types of Access Lists
+  * Standard Access Lists
+    * Matches based on Source address
+    * lower processor utilization
+    * affect depends on application
+  * Extended
+    * Matches based on Source/Destination Address, Protocol, Source/Destination Port Number
+    * Higher Processor utilization
+    * Syntax takes some time to learn
+  * Reflexive (Established)
+    * Allows return traffic for internal Requests
+
+`ip access-list standard __NAME__`
+Allows for named access lists instead of numbers
+
+### Configuring Standard Access Control Lists
+
+* Standard ACL Scenario #1
+
+```text
+R1
+  conf t
+    ip access-list standard SCENARIO1
+      deny 10.1.1.1 0.0.0.0 / deny host 10.1.1.1
+      permit 0.0.0.0 255.255.255.255 / permit any
+    int s0/0 ip access-group SCENARIO1 in
+```
+
+* Standard ACL Scenario #2
+
+```text
+R1
+  conf t
+    ip access-list standard SCENARIO2
+      deny 192.168.2.0 0.0.0.127
+      permit any
+    int g0/0
+      ip access-group SCENARIO2 out
+```
+
+* Standard ACL Scenario #3
+
+```text
+R3
+  conf t
+    access-list 50 deny 192.168.2.50 0.0.0.0
+    access-lsit 50 permit any
+```
+
+* Bonus
+
+```text
+conf t
+  ip access-list standard FILTER_TELNET
+    permit 10.0.0.0 0.255.255.255
+  line vty 0 4
+    access-class FILTER_TELNET in
+```
+
+* If used for security, apply it as close to the destination as possible.
+
+* You can change the sequence number in the list. This tells it how to execute.
+
+## Network Address translation
+
+### Technology Overview
+
+* What is NAT?
+  * Internet = Big Network
+  * Too many devices compared to the number of total IP addresses
+  * IP management necessary
+  * Public and Private Divide Needed
+  * Welcome to NAT!
+* How NAT Works
+  * Originally it was a one to one mechanism
+    * This form of NAT is Commonly called PAT (Port Address Translation)
+    * PAT
+        |Inside Address | Outside Address
+        :---:|:---|
+        192.168.1.50:6711 | 200.1.1.1:6711
+        192.168.1.51:1536 | 200.1.1.1:1536
+    * Allows you to over load a single public address, so it can service multiple private interfaces
+    * Can see that using `netstat`
+    * number of ports available `65,536`
+    * `Socket` when the ip address and port are placed together
+    * Will translate the port (PAT)
+  * Static NAT
+    * Static NAT can translate full IP Addresses or Specific Ports
+      * Inside Address | Outside Address
+        :---:|:---:
+        192.168.1.50:6711 | 200.1.1.1:6711
+        192.168.1.51 | 200.1.1.2
+      * Static NAT are usually for incoming connection
+      * Can take 1 ip address and carve it up to send it to multiple internal devices
+  * Dynamic NAT
