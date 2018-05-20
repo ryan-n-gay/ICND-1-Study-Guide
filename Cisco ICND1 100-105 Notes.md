@@ -1650,3 +1650,41 @@ conf t
       * Static NAT are usually for incoming connection
       * Can take 1 ip address and carve it up to send it to multiple internal devices
   * Dynamic NAT
+
+### Configuring NAT Overload
+
+1. Assign IP addresses and connect devices as shown. The computers can be configured via DHCP or statically.
+    * Internet 200.1.1.1/24 from G0/1
+    * Router to switch 192.168.1.0/24 from G0/0
+2. Configure a default
+    1. Create ACL to ID Addresses to b e translated
+    2. Identify the inside and outside interfaces
+    3. Define NAT Operations
+    4. ```text
+       How to configure NAT Overload
+        reload in ?
+        ip access-list standard NAT_ADDRESSES
+          permit 192.168.1.0 0.0.0.255
+          exit
+        int g0/0
+          ip nat inside
+          exit
+        int g0/1
+          ip nat outside
+
+        ip nat inside source list NAT_ADDRESSES interface g0/1 overload
+
+        sh ip nat translation
+
+        ip nat pool SNUGGLES 200.1.1.2 200.1.1.5 prefix-length 24
+
+        ip nat inside source list NAT_ADDRESSESS pool SNUGGLES overload
+       ```
+
+### Configuring Static NAT
+
+```text
+ip nat inside source static 192.168.1.50 200.1.1.10
+
+ip nat inside source static tcp 192.168.1.51 80 200.1.1.11 80
+ip nat inside source static tcp 192.168.1.51 443 200.1.1.11.443
