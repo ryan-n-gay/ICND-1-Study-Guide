@@ -1688,3 +1688,182 @@ ip nat inside source static 192.168.1.50 200.1.1.10
 
 ip nat inside source static tcp 192.168.1.51 80 200.1.1.11 80
 ip nat inside source static tcp 192.168.1.51 443 200.1.1.11.443
+```
+
+## IPv6
+
+### Welcome to the New addressing world
+
+* Will we ever need to upgrade to IPv6 ?!?
+  * Yes, Virginia...there is an IP address shortage!
+  * Current IP addresses poorly allocated
+  * New network devices on the rise
+  * NAT (Our Current Solution) is now seen as a hindrance to innovation
+  * Potential future features: IPSEC Everywhere, Mobility, Simpler Header
+* IPv6 Addressing Format
+  * Address Size moved from 32 bit (IPv4) to 128 bit (IPv6)
+  * Provides...many many many ...addresses
+  * To make addresses more manageable, divided into 8 groups of 4 hex characters
+  * Rule 1: eliminate groups of consecutive zeros
+    * Can only be used once
+  * Rule 2: Can drop leading zeros in hextet
+
+### New Communication and Address Types
+
+* IPv4
+  * Unicast
+  * Broadcast
+* IPv6
+    Cast | Types of Addresses | meaning
+    :---|---|---
+    Unicast: one-to-one | Link-Local Scope Address: Layer 2 Domain | used for local communication on that network
+    Multicast: one-to-many | Unique/Site-local scope address: Organization | no one uses the standard Private Address
+    Anycast: one-to-closest | Global Scope Address: Internet
+
+  * Multicast
+    * FF02::1:2 reaches all dhcp tables
+    * arp replaced by neighbor-discovery
+
+  * Link-local
+    * Similar to the 169.254.X.X addresses of IPv4
+    * Always begins with "FE80" (First 10 bits: 111 1110 10) followed by 54 bits of Zeros
+    * Last 64 bits is the 48 bit mac address with "FFFE" squeezed in the middle
+    * EUI-64 Addressing
+    * Microsoft uses privacy extension
+
+  * Global Address
+    * Have their high-level 3 bits set to 001 (2000::/3)
+    * Global Routing prefix is 48 bits or less
+    * Subnet ID is comprised of Bits are left over after global routing prefix
+    * The primary addresses comprising the IPv6 internet are from 2001::/16
+      * /32 subnets assigned to providers
+      * /48, /56, /64 subnets assigned to customers
+
+  * No longer tied to a carrier for your IP addresses (Provider Independent)
+  * IPv4 is Provider Affiliated
+
+### Client Addressing
+
+* The Kinds of Addresses a Client can get
+  * Global
+    * Public Addresses (Internet 2)
+    * 2XXX::
+  * Link Local
+    * Generated Automatically (`EUI64` FFFE)
+  * Unique Local
+    * Optional
+    * We can route these without any connection to the internet
+  * Multicast
+    * Group Addressing
+  * Anycast
+    * Same IP address on multiple server
+    * One-to-closest
+* How the client can get those addresses
+  * 1 Hextet = 16 bits
+  * Static Addressing: What it always has been
+  * DHCPv6: What is always has been (Multicast-Powered)
+    * If it starts with `FF02` it is a Multicast Device
+  * SLACC: Stateless Address Auto Configuration
+    * Dynamically asks router to discover network (ICMP Workhorse)
+    * Generates host portion of the address (Relying on DAD)
+      * `DAD` Duplicate Address Detection
+
+### Interface Configuration and Static Routes
+
+1. Assign IP addresses and connect devices as shown
+   * ```text
+     R1
+     sh ip int br
+     conf t
+      ip routing
+      no ip routing
+      ip routing
+      ipv6 unicast-routing
+      int s0/0/0
+        ipv6 address 2001:210:10:1::1/64
+        no shutdown
+     sh ip int br
+     sh ipv6 int br
+
+     R2
+      conf t
+        ipv6 unicast-routing
+        int s0/0/0
+          ipv6 address 2001:210:10:1::2/64
+          no shutdown
+     ```
+2. Test by pining between the two devices
+   * Pings are fully functional at this point.
+   * ping ipv6 
+3. Configure a static route allowing the two LAN connections to reach each other
+   * ```text
+     R2
+     conf t
+      int loopback 0
+        ipv6 address 2001:56::1
+        no shutdown
+        exit
+      ipv6 route 2001:55::0/64 2001:210:10:1::1
+
+     R1
+     conf t
+      int loopback 0
+        ipv6 address 2001:55::1
+        no shutdown
+        exit
+      ipv6 route 2001:56::0/64 2001:210:10:1::2
+     ```
+4. Test using ping sourced from each LAN Interface of the Routers
+   * ping ipv6 `follow prompt`
+
+* loopback which is online and access able as long as the router is running
+  * Great for emulation networks
+
+## Device Management
+
+### Logging via Syslog
+
+* The Beauty of Syslog
+  * `FACT:` Most Network engineers do not implement comprehensive logging
+  * Syslog Message Format:
+    * ```text
+      conf t
+        logging console
+      for vty
+        terminal monitor
+
+      logging host X.X.X.X
+      ```
+  * Key Practices:
+    * Use the same IOS Version (Different Messages, Severity)
+    * Out of band management (Security, Performance)
+    * Centralized Logging Server (Splunk, Syslog, etc)
+* Implementing a Small Syslogging Environment
+  * Syslog Captures key status messages
+
+### Backing Up and Restoring the IOS and configuration
+
+* Understanding File Storage Locations
+  * Cisco Devices have multiple  storage locations where they can access files
+    * Flash
+      * IOS
+    * RAM
+      * Running config
+    * NVRAM
+      * Config
+  * Copy command allows you to perform file management between locations
+    * HTTP
+    * FTP
+      * Login Required
+    * TFTP
+      * UDP
+      * No login
+
+* Access the device shown in the picture
+* Backup the IOS to the TFTP server shown
+* Backup the running config to the TFTP Server
+* Restore the IOS and running config to the router the proper way
+
+```text
+
+```
