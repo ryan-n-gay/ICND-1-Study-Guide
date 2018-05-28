@@ -1794,7 +1794,7 @@ ip nat inside source static tcp 192.168.1.51 443 200.1.1.11.443
      ```
 2. Test by pining between the two devices
    * Pings are fully functional at this point.
-   * ping ipv6 
+   * ping ipv6
 3. Configure a static route allowing the two LAN connections to reach each other
    * ```text
      R2
@@ -1865,5 +1865,66 @@ ip nat inside source static tcp 192.168.1.51 443 200.1.1.11.443
 * Restore the IOS and running config to the router the proper way
 
 ```text
+copy flash:FILE_NAME tftp://X.X.X.X/FILE_NAME
 
+copy running-config tftp:
+
+copy startup-config tftp
+
+copy tftp flash
+
+copy tftp startup-conf
+
+sqeeze flash
 ```
+
+### The Network Time Protocol (NTP)
+
+* What is the Network Time Protocol
+  * Keeps Cisco Clocks in Synchronized (no clock drift), Valuable For:
+    * Log Files
+    * Certificates
+    * ...much more
+  * Set in Three ways
+    * Poll an NTP Server (Typically and NTP Client)
+    * Listen to NTP Multicasts
+    * Listen to NTP Broadcasts
+* Configure NTP Server Polling
+  * ```text
+    clock set
+
+    conf t
+      clock timezone CENTRAL -?
+      ntp server X.X.X.X
+      do sh clock
+    ```
+
+### Password Recovery
+
+* Security, Step 1: Door, Lock, and Key
+* Password Recovery Walkthrough
+  * How a Cisco Device Boots
+    * Check the configuration register
+      * sh version
+    * Check for "boot system" commands in the startup   config
+    * Look for the first IOS Image in flash
+    * Broadcast for TFTP Server
+  * ```text
+    copy start run
+    conf t
+    config-register 0x2142
+    ```
+  * Use rommon to get set the configuration-register
+    ```text
+    control break
+    confreg 0x2142
+    reset
+
+    copy startup running
+    enable secret cisco
+    exit
+    wr mem
+    config-register 0x2102
+    ```
+  * 2102 normal startup
+  * 2142 initial config mode
